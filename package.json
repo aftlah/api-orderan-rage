@@ -1,6 +1,13 @@
 {
+  "name": "api-orderan-rage",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/app.js",
   "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2"
   }
 }
