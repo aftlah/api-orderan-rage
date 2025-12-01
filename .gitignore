@@ -4,6 +4,7 @@ package-lock.json
 yarn.lock
 
 # Environment variables
+.env
 .env.example
 .env.local
 .env.*.local
