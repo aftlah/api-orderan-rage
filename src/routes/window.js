@@ -18,6 +18,21 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
+router.get("/active", async (req, res) => {
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("order_windows")
+    .select("*")
+    .eq("is_active", true)
+    .lte("start_time", now)
+    .gte("end_time", now)
+    .order("orderanke", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) return res.status(500).json({ error });
+  res.json(data || null);
+});
+
 /*
 ----------------------------------------------------
  CREATE NEW WINDOW

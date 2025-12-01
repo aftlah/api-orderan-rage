@@ -131,14 +131,12 @@ router.post("/", async (req, res) => {
         0
       );
       if (existingVest + vestInCart > 5) {
-        return res
-          .status(400)
-          .json({
-            error: `Maksimal VEST per orang 5. Tersisa ${Math.max(
-              0,
-              5 - existingVest
-            )}.`,
-          });
+        return res.status(400).json({
+          error: `Maksimal VEST per orang 5. Tersisa ${Math.max(
+            0,
+            5 - existingVest
+          )}.`,
+        });
       }
     }
 
@@ -156,14 +154,12 @@ router.post("/", async (req, res) => {
           .ilike("item", norm);
         const dbQty = (dbRows || []).reduce((a, r) => a + (r.qty || 0), 0);
         if (dbQty + cartQty > it.maxQty) {
-          return res
-            .status(400)
-            .json({
-              error: `Maks ${it.itemName} ${it.maxQty}. Tersisa ${Math.max(
-                0,
-                it.maxQty - dbQty
-              )}.`,
-            });
+          return res.status(400).json({
+            error: `Maks ${it.itemName} ${it.maxQty}. Tersisa ${Math.max(
+              0,
+              it.maxQty - dbQty
+            )}.`,
+          });
         }
       }
     }
@@ -268,4 +264,43 @@ router.post("/notify", async (req, res) => {
   }
 });
 
+router.get("/details", (req, res) => {
+  const month = Number(req.query.month);
+  const week = Number(req.query.week);
+  const nameFilter = (req.query.name || "").toString().trim().toLowerCase();
+  if (!month || !week)
+    return res.status(400).json({ error: "month and week are required" });
+  const orderanke = month * 10 + week;
+
+  // Asumsikan 'orders' berisi { memberId, orderanke, items: [{ itemName, qty, harga }], created_at, order_no, delivered }
+  const rows = [];
+  for (const o of orders) {
+    if (Number(o.orderanke) !== orderanke) continue;
+    const mname =
+      members.find((m) => String(m.id) === String(o.memberId))?.name ??
+      "Unknown";
+    if (nameFilter && !mname.toLowerCase().includes(nameFilter)) continue;
+    for (const it of o.items || []) {
+      rows.push({
+        order_no:
+          o.order_no ||
+          `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        member_name: mname,
+        created_at: o.created_at || new Date().toISOString(),
+        item_name: it.itemName || it.itemId,
+        qty: Number(it.qty || 0),
+        subtotal: Number(it.harga || 0) * Number(it.qty || 0),
+        delivered: Boolean(o.delivered),
+      });
+    }
+  }
+  // Urut terbaru
+  rows.sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+  res.json(rows);
+});
+
 export default router;
+

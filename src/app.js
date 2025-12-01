@@ -8,6 +8,7 @@ import ordersRoute from "./routes/order.js";
 import membersRoute from "./routes/member.js";
 import windowsRoute from "./routes/window.js";
 import authRoute from "./routes/auth.js";
+import dashboardRoute from "./routes/dashboard.js";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/orders", ordersRoute);
 app.use("/api/members", membersRoute);
 app.use("/api/windows", windowsRoute);
 app.use("/api/auth", authRoute);
+app.use("/api/dashboard", dashboardRoute);
 
 // Health check
 app.get("/", (req, res) => {
