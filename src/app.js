@@ -4,9 +4,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import ordersRoute from "./routes/orders.js";
-import membersRoute from "./routes/members.js";
-import windowsRoute from "./routes/windows.js";
+import ordersRoute from "./routes/order.js";
+import membersRoute from "./routes/member.js";
+import windowsRoute from "./routes/window.js";
 
 const app = express();
 
