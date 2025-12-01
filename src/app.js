@@ -7,6 +7,7 @@ dotenv.config();
 import ordersRoute from "./routes/order.js";
 import membersRoute from "./routes/member.js";
 import windowsRoute from "./routes/window.js";
+import authRoute from "./routes/auth.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use("/api/orders", ordersRoute);
 app.use("/api/members", membersRoute);
 app.use("/api/windows", windowsRoute);
+app.use("/api/auth", authRoute);
 
 // Health check
 app.get("/", (req, res) => {
@@ -29,7 +31,7 @@ app.get("/", (req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
