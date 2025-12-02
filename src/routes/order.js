@@ -264,43 +264,61 @@ router.post("/notify", async (req, res) => {
   }
 });
 
-router.get("/details", (req, res) => {
-  const month = Number(req.query.month);
-  const week = Number(req.query.week);
-  const nameFilter = (req.query.name || "").toString().trim().toLowerCase();
-  if (!month || !week)
-    return res.status(400).json({ error: "month and week are required" });
-  const orderanke = month * 10 + week;
+/*
+----------------------------------------------------
+ GET ORDER DETAILS (month + week + optional name)
+----------------------------------------------------
+*/
+router.get("/details", async (req, res) => {
+  try {
+    const month = Number(req.query.month);
+    const week = Number(req.query.week);
+    const nameFilter = (req.query.name || "").toString().trim().toLowerCase();
 
-  // Asumsikan 'orders' berisi { memberId, orderanke, items: [{ itemName, qty, harga }], created_at, order_no, delivered }
-  const rows = [];
-  for (const o of orders) {
-    if (Number(o.orderanke) !== orderanke) continue;
-    const mname =
-      members.find((m) => String(m.id) === String(o.memberId))?.name ??
-      "Unknown";
-    if (nameFilter && !mname.toLowerCase().includes(nameFilter)) continue;
-    for (const it of o.items || []) {
+    if (!month || !week) {
+      return res.status(400).json({ error: "month and week are required" });
+    }
+
+    const orderanke = month * 10 + week;
+
+    // Ambil semua orders sesuai periode
+    const { data: orders, error } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("orderanke", orderanke)
+      .order("waktu", { ascending: false });
+
+    if (error) return res.status(500).json({ error });
+
+    const rows = [];
+
+    // Build display row
+    for (const o of orders) {
+      // filter by name (optional)
+      if (
+        nameFilter &&
+        !String(o.nama || "")
+          .toLowerCase()
+          .includes(nameFilter)
+      )
+        continue;
+
       rows.push({
-        order_no:
-          o.order_no ||
-          `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        member_name: mname,
-        created_at: o.created_at || new Date().toISOString(),
-        item_name: it.itemName || it.itemId,
-        qty: Number(it.qty || 0),
-        subtotal: Number(it.harga || 0) * Number(it.qty || 0),
+        order_no: o.order_id,
+        member_name: o.nama,
+        created_at: o.waktu,
+        item_name: o.item,
+        qty: Number(o.qty || 0),
+        subtotal: Number(o.subtotal || 0),
         delivered: Boolean(o.delivered),
       });
     }
+
+    return res.json(rows);
+  } catch (err) {
+    console.error("DETAILS ERROR:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-  // Urut terbaru
-  rows.sort(
-    (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
-  res.json(rows);
 });
 
 export default router;
-
