@@ -13,7 +13,11 @@ import dashboardRoute from "./routes/dashboard.js";
 const app = express();
 
 // Middleware
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+app.use(cors({
+  origin: ['https://rage-site.aftlah.my.id'],
+  methods: ['GET','POST','PUT','DELETE'],
+  allowedHeaders: ['Content-Type','Authorization'],
+}));
 app.use(express.json());
 
 // Routes
